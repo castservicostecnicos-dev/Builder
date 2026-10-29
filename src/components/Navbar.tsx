@@ -7,7 +7,8 @@ import {
   BookOpen, 
   Cpu, 
   CheckCircle2,
-  RefreshCw
+  RefreshCw,
+  Cloud
 } from 'lucide-react';
 import { StudioMode } from '../types/studio';
 
@@ -17,6 +18,7 @@ interface NavbarProps {
   mode: StudioMode;
   onToggleMode: (mode: StudioMode) => void;
   onOpenGitModal: () => void;
+  onOpenCloudflareModal: () => void;
   onExportZip: () => void;
   onNewProject: () => void;
   hasApiKey: boolean;
@@ -29,6 +31,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   mode,
   onToggleMode,
   onOpenGitModal,
+  onOpenCloudflareModal,
   onExportZip,
   onNewProject,
   hasApiKey,
@@ -68,8 +71,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* Mode Switcher & API Status */}
-      <div className="flex items-center gap-2 sm:gap-3">
+      {/* Mode Switcher & Cloudflare / Git Actions */}
+      <div className="flex items-center gap-2 sm:gap-2.5">
         {/* Beginner vs Pro Mode Toggle */}
         <div className="bg-slate-900 p-0.5 rounded-lg border border-slate-800 flex items-center text-xs">
           <button
@@ -98,30 +101,34 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         </div>
 
-        {/* API Engine indicator */}
-        <div className="hidden lg:flex items-center gap-1 px-2 py-1 rounded-md bg-slate-900/70 border border-slate-800 text-[11px] text-slate-400">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span>Gemini 3.8</span>
-        </div>
-
-        {/* Action Buttons */}
+        {/* Cloudflare Pages Deploy Action Button */}
         <button
-          onClick={onExportZip}
-          disabled={isGenerating}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700/80 transition cursor-pointer shadow-sm disabled:opacity-50"
-          title="Baixar projeto completo como pacote .ZIP pronto para Git"
+          onClick={onOpenCloudflareModal}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-400 hover:text-amber-300 text-xs font-bold rounded-lg border border-amber-500/40 shadow-sm transition active:scale-95 cursor-pointer"
+          title="Publicar e configurar no Cloudflare Pages"
         >
-          <Download className="w-3.5 h-3.5 text-indigo-400" />
-          <span className="hidden sm:inline">Baixar Git (.ZIP)</span>
+          <Cloud className="w-3.5 h-3.5 fill-current text-amber-400" />
+          <span>Cloudflare Pages</span>
         </button>
 
+        {/* Git Sync Button */}
         <button
           onClick={onOpenGitModal}
           className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 active:scale-95 text-white text-xs font-semibold rounded-lg shadow-md shadow-indigo-600/25 transition cursor-pointer"
           title="Sincronizar e comitar alterações diretamente para o Git / GitHub"
         >
           <GitBranch className="w-3.5 h-3.5" />
-          <span>Git Sync</span>
+          <span className="hidden sm:inline">Git Sync</span>
+        </button>
+
+        {/* Download Zip */}
+        <button
+          onClick={onExportZip}
+          disabled={isGenerating}
+          className="p-1.5 sm:px-2.5 sm:py-1.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 text-xs font-medium rounded-lg border border-slate-700/80 transition cursor-pointer disabled:opacity-50"
+          title="Baixar projeto completo como pacote .ZIP"
+        >
+          <Download className="w-3.5 h-3.5 text-indigo-400" />
         </button>
 
         <button

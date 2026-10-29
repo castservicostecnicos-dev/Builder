@@ -1,0 +1,8 @@
+name = "devforge-studio-ai"
+compatibility_date = "2026-10-29"
+pages_build_output_dir = "dist"
+
+[vars]
+# Defina GEMINI_API_KEY no painel do Cloudflare Pages (Settings > Environment Variables)
+# ou descomente para desenvolvimento local:
+# GEMINI_API_KEY = "sua_chave_aqui"

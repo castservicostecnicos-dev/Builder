@@ -21,6 +21,7 @@ import {
   CodeExplanation, 
   ComplexComponent 
 } from './types/studio';
+import { CloudflarePublishModal } from './components/CloudflarePublishModal';
 import { exportProjectToGitZip } from './utils/gitZipExporter';
 
 // Default initial state project
@@ -275,6 +276,7 @@ export default function App() {
   const [isExplaining, setIsExplaining] = useState(false);
   const [explainedText, setExplainedText] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isCloudflareModalOpen, setIsCloudflareModalOpen] = useState(false);
 
   // Check health and API key on mount
   useEffect(() => {
@@ -493,6 +495,7 @@ export default function App() {
         mode={mode}
         onToggleMode={setMode}
         onOpenGitModal={() => setActiveTab('git')}
+        onOpenCloudflareModal={() => setIsCloudflareModalOpen(true)}
         onExportZip={handleExportZip}
         onNewProject={() => {
           if (confirm('Deseja iniciar um novo projeto? As alterações atuais serão redefinidas.')) {
@@ -631,6 +634,15 @@ export default function App() {
           <span>{toastMessage}</span>
         </div>
       )}
+
+      {/* Cloudflare Pages Publish Modal */}
+      <CloudflarePublishModal
+        isOpen={isCloudflareModalOpen}
+        onClose={() => setIsCloudflareModalOpen(false)}
+        appName={appName}
+        onExportZip={handleExportZip}
+        onOpenGitSync={() => setActiveTab('git')}
+      />
     </div>
   );
 }
