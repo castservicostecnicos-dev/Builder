@@ -1,0 +1,6 @@
+{
+  "name": "DevForge Studio AI - Automação de Código & Apps com Git",
+  "description": "Plataforma de inteligência artificial estilo Google AI Studio para geração instantânea de apps, componentes complexos e integração direta com repositórios Git.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
