@@ -23,6 +23,7 @@ import {
 } from './types/studio';
 import { CloudflarePublishModal } from './components/CloudflarePublishModal';
 import { exportProjectToGitZip } from './utils/gitZipExporter';
+import { generateClientSideProject } from './utils/clientGenerativeEngine';
 
 // Default initial state project
 const INITIAL_APP_NAME = 'Nexus Platform';
@@ -304,7 +305,9 @@ export default function App() {
     // Simulate animated step progress during streaming
     const stepInterval = setInterval(() => {
       setCurrentThinkingIndex((prev) => Math.min(prev + 1, thinkingSteps.length - 1));
-    }, 900);
+    }, 800);
+
+    let d: any = null;
 
     try {
       const res = await fetch('/api/generate-project', {
@@ -318,54 +321,63 @@ export default function App() {
         }),
       });
 
-      const responseJson = await res.json();
-      clearInterval(stepInterval);
-
-      if (responseJson.success && responseJson.data) {
-        const d = responseJson.data;
-
-        // Save previous files to compute Git diff
-        setPreviousFiles([...files]);
-
-        if (d.appName) setAppName(d.appName);
-        if (d.files && Array.isArray(d.files)) {
-          setFiles(d.files);
-          setActiveFile(d.files[0] || null);
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
+        const responseJson = await res.json();
+        if (responseJson && responseJson.success && responseJson.data) {
+          d = responseJson.data;
         }
-        if (d.previewHtml) {
-          setPreviewHtml(d.previewHtml);
-        }
-        if (d.explanation) {
-          setExplanation(d.explanation);
-        }
-        if (d.thinkingSteps && Array.isArray(d.thinkingSteps)) {
-          setThinkingSteps(d.thinkingSteps);
-        }
-
-        // Add new Git commit to project history
-        if (d.gitCommit) {
-          const newCommit: GitCommit = {
-            id: Date.now().toString(),
-            hash: Math.random().toString(16).substring(2, 9),
-            branch: d.gitCommit.branch || 'main',
-            title: d.gitCommit.title || 'feat: update application code',
-            description: d.gitCommit.description || 'Alterações automatizadas geradas pela IA',
-            diffSummary: d.gitCommit.diffSummary || '3 arquivos alterados',
-            timestamp: new Date().toLocaleTimeString(),
-            author: 'DevForge AI Engine',
-          };
-          setCommits([newCommit, ...commits]);
-        }
-
-        showToast('Aplicação gerada e sincronizada com sucesso!');
-        setActiveTab('preview');
-      } else {
-        showToast('Erro ao gerar aplicação. Tente novamente.');
       }
-    } catch (err: any) {
-      clearInterval(stepInterval);
-      console.error('Generation error:', err);
-      showToast('Falha na comunicação com o servidor');
+    } catch (networkOrEdgeError) {
+      console.warn('Network error or static Cloudflare Pages hosting, switching to client engine:', networkOrEdgeError);
+    }
+
+    // Always fallback to autonomous client-side engine if server not available
+    if (!d) {
+      d = generateClientSideProject(promptText, mode);
+    }
+
+    clearInterval(stepInterval);
+
+    try {
+      // Save previous files to compute Git diff
+      setPreviousFiles([...files]);
+
+      if (d.appName) setAppName(d.appName);
+      if (d.files && Array.isArray(d.files)) {
+        setFiles(d.files);
+        setActiveFile(d.files[0] || null);
+      }
+      if (d.previewHtml) {
+        setPreviewHtml(d.previewHtml);
+      }
+      if (d.explanation) {
+        setExplanation(d.explanation);
+      }
+      if (d.thinkingSteps && Array.isArray(d.thinkingSteps)) {
+        setThinkingSteps(d.thinkingSteps);
+      }
+
+      // Add new Git commit to project history
+      if (d.gitCommit) {
+        const newCommit: GitCommit = {
+          id: Date.now().toString(),
+          hash: Math.random().toString(16).substring(2, 9),
+          branch: d.gitCommit.branch || 'main',
+          title: d.gitCommit.title || 'feat: update application code',
+          description: d.gitCommit.description || 'Alterações automatizadas geradas pela IA',
+          diffSummary: d.gitCommit.diffSummary || '3 arquivos alterados',
+          timestamp: new Date().toLocaleTimeString(),
+          author: 'DevForge AI Studio Engine',
+        };
+        setCommits([newCommit, ...commits]);
+      }
+
+      showToast('Aplicação e interface demonstrativa geradas com sucesso!');
+      setActiveTab('preview');
+    } catch (applyErr: any) {
+      console.error('Apply error:', applyErr);
+      showToast('Erro ao renderizar projeto.');
     } finally {
       setIsGenerating(false);
     }
